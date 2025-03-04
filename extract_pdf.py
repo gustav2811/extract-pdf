@@ -4,39 +4,12 @@ import shutil
 import pdfplumber
 import pandas as pd
 import traceback
-from pdfminer.pdfdocument import PDFPasswordIncorrect
+from utils.password_utils import get_pdf_password
 
 # Configure logging to display the time, level and message.
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
-
-
-def get_password_if_needed(pdf_path):
-    """
-    Check if a PDF is password-protected and get the password if needed.
-    Returns None if no password is required.
-    """
-    # First try without any password
-    try:
-        with pdfplumber.open(pdf_path, password="") as pdf:
-            return None
-    except PDFPasswordIncorrect:
-        # If we get here, the PDF is password-protected
-        logging.info(f"{os.path.basename(pdf_path)} is password-protected.")
-        while True:
-            password = input(f"Enter password for {os.path.basename(pdf_path)}: ")
-            try:
-                # Test if the password works
-                with pdfplumber.open(pdf_path, password=password):
-                    return password
-            except PDFPasswordIncorrect:
-                print("Incorrect password. Please try again.")
-    except Exception as e:
-        # Handle other exceptions
-        logging.error(f"Error in get_password_if_needed: {str(e)}")
-        logging.error(f"Traceback: {traceback.format_exc()}")
-        raise
 
 
 def extract_tables_from_pdf(pdf_path):
@@ -51,7 +24,7 @@ def extract_tables_from_pdf(pdf_path):
         logging.info(f"Extracting tables from {os.path.basename(pdf_path)}.")
 
         # Get password if needed
-        password = get_password_if_needed(pdf_path)
+        password = get_pdf_password(pdf_path)
 
         # Open the PDF with password (if any)
         with pdfplumber.open(pdf_path, password=password) as pdf:
