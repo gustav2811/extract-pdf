@@ -4,6 +4,7 @@ import shutil
 import pdfplumber
 import pandas as pd
 import traceback
+import sys
 from pdfminer.pdfdocument import PDFPasswordIncorrect
 
 # Configure logging to display the time, level and message.
@@ -113,15 +114,30 @@ def move_to_archive(file_path, archive_folder):
 
 
 def main():
+    # Show startup message
+    print("Welcome!\n")
+    print("IMPORTANT: Please read the instructions in 'Instructions.pdf' before using this tool.\n")
+    print("Press Enter to continue...")
+    input()  # Wait for user to press Enter
+
     logging.info("Starting PDF table extraction process.")
 
+    # Determine base directory
+    if getattr(sys, "frozen", False):
+        # Running as PyInstaller executable
+        base_dir = os.path.dirname(sys.executable)
+    else:
+        # Running as normal Python script
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+
+
     # Define paths relative to the script's location
-    base_dir = os.path.dirname(os.path.abspath(__file__))
     input_folder = os.path.join(base_dir, "input")
     output_folder = os.path.join(base_dir, "output")
     archive_folder = os.path.join(base_dir, "archive")
 
-    # Ensure output and archive directories exist
+    # Ensure folders exist
+    os.makedirs(input_folder, exist_ok=True)
     os.makedirs(output_folder, exist_ok=True)
     os.makedirs(archive_folder, exist_ok=True)
 
@@ -153,3 +169,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+input("\nProcessing complete. Press Enter to close the program...")
